@@ -31,8 +31,6 @@ namespace StarterAssets
 
         [Header("Cinemachine")]
         [SerializeField] private GameObject _cinemachineCameraTarget;
-        [SerializeField] private GameObject _cinemachineAimCam; 
-        [SerializeField] private GameObject _cinemachineFollowCam;
         [SerializeField] private float _topClamp = 70.0f;
         [SerializeField] private float _bottomClamp = -30.0f;
         [SerializeField] private float _cameraAngleOverride = 0.0f;
@@ -42,11 +40,6 @@ namespace StarterAssets
         [SerializeField] private AudioClip _landingAudioClip;
         [SerializeField] private AudioClip[] _footstepAudioClips;
         [SerializeField] [Range(0, 1)] private float _footstepAudioVolume = 0.5f;
-
-        [Header("Bow and Arrow")]
-        [SerializeField] private GameObject _bowObject;
-        [SerializeField] private GameObject _arrowObject;
-        [SerializeField] private Transform _arrowPoint;
 
         // cinemachine
         private float _cinemachineTargetYaw;
@@ -126,8 +119,6 @@ namespace StarterAssets
             PlayerJumpAndGravity();
             
             PlayerMovement();
-
-            AimShoot();
         }
 
         private void LateUpdate()
@@ -312,31 +303,6 @@ namespace StarterAssets
             {
                 AudioSource.PlayClipAtPoint(_landingAudioClip, transform.TransformPoint(_controller.center), _footstepAudioVolume);
             }
-        }
-
-        private void AimShoot()
-        {
-            if(_input.isAiming && _grounded && !_input.sprint)
-            {
-                _animator.SetBool("Aiming", _input.isAiming);
-                _animator.SetBool("Shooting", _input.isShooting);
-                _cinemachineFollowCam.SetActive(false);
-                _cinemachineAimCam.SetActive(true);
-            }
-            else
-            {
-                _animator.SetBool("Aiming", false);
-                _animator.SetBool("Shooting", false);
-                _cinemachineFollowCam.SetActive(true);
-                _cinemachineAimCam.SetActive(false);
-            }
-        }
-
-        public void Shoot()
-        {
-            Debug.Log("Throw Arrow");
-            GameObject arrow = Instantiate(_arrowObject, _arrowPoint.position,this.transform.rotation);
-            arrow.GetComponent<Rigidbody>().AddForce(transform.forward * 25f,ForceMode.Impulse);
         }
     }
 }
