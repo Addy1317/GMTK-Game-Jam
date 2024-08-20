@@ -31,6 +31,8 @@ namespace StarterAssets
 
         [Header("Cinemachine")]
         [SerializeField] private GameObject _cinemachineCameraTarget;
+        [SerializeField] private GameObject _cinemachineAimCam; 
+        [SerializeField] private GameObject _cinemachineFollowCam;
         [SerializeField] private float _topClamp = 70.0f;
         [SerializeField] private float _bottomClamp = -30.0f;
         [SerializeField] private float _cameraAngleOverride = 0.0f;
@@ -40,6 +42,7 @@ namespace StarterAssets
         [SerializeField] private AudioClip _landingAudioClip;
         [SerializeField] private AudioClip[] _footstepAudioClips;
         [SerializeField] [Range(0, 1)] private float _footstepAudioVolume = 0.5f;
+
 
         // cinemachine
         private float _cinemachineTargetYaw;
@@ -119,6 +122,8 @@ namespace StarterAssets
             PlayerJumpAndGravity();
             
             PlayerMovement();
+
+           // AimShoot();
         }
 
         private void LateUpdate()
@@ -304,5 +309,7 @@ namespace StarterAssets
                 AudioSource.PlayClipAtPoint(_landingAudioClip, transform.TransformPoint(_controller.center), _footstepAudioVolume);
             }
         }
+
+        
     }
 }

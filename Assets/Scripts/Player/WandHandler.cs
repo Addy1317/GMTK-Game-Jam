@@ -1,24 +1,21 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace GameJam.GMTK.Player
+namespace GameJam.GMTK.Wand
 {
-
-
     public enum PlayerWandSelection
     {
-        None,
-        ShrinkWand = 0,
-        ExpandWand = 1
+        None = 0,
+        ShrinkWand = 1,
+        ExpandWand = 2
     }
 
-    public class WandController : MonoBehaviour
+    public class WandHandler : MonoBehaviour
     {
         [SerializeField] private Camera playerCamera;
 
         [SerializeField] private PlayerWandSelection playerWandSelection = PlayerWandSelection.None;
 
-        [SerializeField] private Transform wandPointTransform;
         [SerializeField] private GameObject shrinkWand;
         [SerializeField] private GameObject expandWand;
 
@@ -28,7 +25,7 @@ namespace GameJam.GMTK.Player
         [SerializeField] private Image wandIndicatorImage;
         [SerializeField] private Sprite[] wandSprites;
 
-        [SerializeField] private Animator animator;
+        private Transform selectedObject;
 
         void Start()
         {
@@ -38,7 +35,8 @@ namespace GameJam.GMTK.Player
         void Update()
         {
             HandleWandSwitching();
-            PlayerWandShoot();
+            HandleObjectSelection();
+            HandleObjectManipulation();
         }
 
         private void HandleWandSwitching()
@@ -46,38 +44,43 @@ namespace GameJam.GMTK.Player
             if (Input.GetAxis("Mouse ScrollWheel") > 0f)
             {
                 playerWandSelection = (PlayerWandSelection)(((int)playerWandSelection + 1) % 2);
-                wandIndicatorImage.sprite = wandSprites[0];
-
                 SelectWand();
             }
             else if (Input.GetAxis("Mouse ScrollWheel") < 0f)
             {
                 playerWandSelection--;
                 if (playerWandSelection < 0) playerWandSelection = PlayerWandSelection.ExpandWand;
-                wandIndicatorImage.sprite = wandSprites[1];
-
                 SelectWand();
             }
         }
 
-        private void PlayerWandShoot()
+        private void HandleObjectSelection()
         {
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0)) // Left mouse button for selection
             {
-                animator.SetTrigger("Wand");
                 Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    switch (playerWandSelection)
-                    {
-                        case PlayerWandSelection.ShrinkWand:
-                            ShrinkObject(hit.transform);
-                            break;
+                    selectedObject = hit.transform;
+                }
+            }
+        }
 
-                        case PlayerWandSelection.ExpandWand:
-                            ExpandObject(hit.transform);
-                            break;
-                    }
+        private void HandleObjectManipulation()
+        {
+            if (selectedObject == null) return;
+
+            if (Input.GetMouseButtonDown(1)) // Right mouse button for manipulation
+            {
+                switch (playerWandSelection)
+                {
+                    case PlayerWandSelection.ShrinkWand:
+                        ShrinkObject(selectedObject);
+                        break;
+
+                    case PlayerWandSelection.ExpandWand:
+                        ExpandObject(selectedObject);
+                        break;
                 }
             }
         }
@@ -89,23 +92,37 @@ namespace GameJam.GMTK.Player
                 case PlayerWandSelection.ShrinkWand:
                     shrinkWand.SetActive(true);
                     expandWand.SetActive(false);
+                    wandIndicatorImage.sprite = wandSprites[0];
                     break;
 
                 case PlayerWandSelection.ExpandWand:
                     shrinkWand.SetActive(false);
                     expandWand.SetActive(true);
+                    wandIndicatorImage.sprite = wandSprites[1];
                     break;
             }
         }
 
-        void ShrinkObject(Transform obj)
+        private void ShrinkObject(Transform obj)
         {
-            obj.localScale *= shrinkRate; // Shrink by shrinkRate factor
+            obj.localScale *= shrinkRate;
         }
 
-        void ExpandObject(Transform obj)
+        private void ExpandObject(Transform obj)
         {
-            obj.localScale *= expandRate; // Expand by expandRate factor
+            obj.localScale *= expandRate;
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (selectedObject != null)
+            {
+                // Set the color for the Gizmo
+                Gizmos.color = Color.yellow;
+
+                // Draw a wireframe cube around the selected object to indicate selection
+                Gizmos.DrawWireCube(selectedObject.position, selectedObject.localScale);
+            }
         }
     }
 }
